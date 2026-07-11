@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using myshop.DataAccess.Common;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -7,12 +8,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace myshop.Entities.Models
+namespace myshop.DataAccess.Entities
 {
-    public class Product
+    public class Product : BaseEntity
     {
-        public int Id { get; set; }
-
         [Required]
         public string Name { get; set; }
         public string Description { get; set; }
@@ -27,6 +26,7 @@ namespace myshop.Entities.Models
         [Required]
         [DisplayName("Category")]
         public int CategoryId { get; set; }
+
         [ValidateNever]
         public Category Category { get; set; }
     }

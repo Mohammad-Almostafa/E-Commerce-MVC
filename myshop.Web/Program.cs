@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using myshop.Business.Services.Implementations;
+using myshop.Business.Services.Interfaces;
 using myshop.DataAccess;
-using myshop.Entities.Models;
-using Stripe;
-using System;
+using myshop.DataAccess.Entities;
+using myshop.DataAccess.Rebositories.Interfaces;
+using myshop.DataAccess.Repositories;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +22,9 @@ builder.Services.AddIdentity<ApplicationUser,IdentityRole>(
     ).AddDefaultTokenProviders().AddDefaultUI()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
+//services
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IFileService, FileService>();
 
 builder.Services.AddHttpContextAccessor();
 
@@ -29,8 +34,9 @@ builder.Services.AddSession();
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.Migrate();
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    
+    ApplicationDbContext.CreateInitialDbData(context);
 }
 
 
