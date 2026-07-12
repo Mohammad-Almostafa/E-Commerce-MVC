@@ -1,4 +1,5 @@
 ﻿using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using myshop.Business.DTOs;
 using myshop.DataAccess.Entities;
@@ -6,6 +7,7 @@ using myshop.DataAccess.Rebositories.Interfaces;
 
 namespace myshop.Web.Areas.Admin.Controllers
 {
+    [Authorize(Policy = "AdminOperations")]
     public class CategoryController : Controller
     {
         private readonly IUnitOfWork unitOfWork;

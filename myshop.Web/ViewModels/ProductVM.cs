@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using myshop.DataAccess.Entities;
 
-namespace myshop.Entities.ViewModels
+namespace myshop.Web.ViewModels
 {
     public class ProductVM
     {

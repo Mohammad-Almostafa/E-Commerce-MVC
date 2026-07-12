@@ -1,14 +1,16 @@
 ﻿using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using myshop.Business.DTOs;
-using myshop.DataAccess.Rebositories.Interfaces;
-using myshop.Entities.ViewModels;
-using myshop.DataAccess.Entities;
 using myshop.Business.Services.Interfaces;
+using myshop.DataAccess.Entities;
+using myshop.DataAccess.Rebositories.Interfaces;
+using myshop.Web.ViewModels;
 
 namespace myshop.Web.Areas.Admin.Controllers
 {
+    [Authorize(Policy = "AdminOperations")]
     public class ProductController : Controller
     {
         private readonly IUnitOfWork unitOfWork;
