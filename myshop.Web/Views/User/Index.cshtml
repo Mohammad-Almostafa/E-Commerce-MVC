@@ -6,6 +6,7 @@
 }
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
 
 <style>
     .custom-card {
@@ -98,6 +99,21 @@
     .btn-info {
         background: #06b6d4;
         color: white;
+    }
+
+    .dataTables_wrapper .dataTables_filter input {
+        border: 1px solid #3b82f6 !important;
+        border-radius: 8px !important;
+        padding: 6px 12px !important;
+        background: rgba(255, 255, 255, 0.9) !important;
+        margin-bottom: 15px;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: linear-gradient(135deg,#1e40af,#2563eb) !important;
+        color: white !important;
+        border-radius: 8px !important;
+        border: none !important;
     }
 </style>
 
@@ -203,3 +219,21 @@
     </div>
 
 </div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#mytable').DataTable({
+                "paging": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "pageLength": 5,
+                "lengthMenu": [1, 5, 10, 25, 50]
+            });
+        });
+    </script>
+}
