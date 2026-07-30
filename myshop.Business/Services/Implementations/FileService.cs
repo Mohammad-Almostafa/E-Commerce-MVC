@@ -21,8 +21,9 @@ namespace myshop.Business.Services.Implementations
 
             string rootPath = _webHostEnvironment.WebRootPath;
             string filename = Guid.NewGuid().ToString();
-            var uploadPath = Path.Combine(rootPath, "Images", folderName);
-            var ext = Path.GetExtension(file.FileName);
+            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+            // تحديد مسار التخزين (مثل: wwwroot/uploads/products)
+            var uploadPath = Path.Combine(rootPath, "uploads", folderName);
 
             if (!Directory.Exists(uploadPath))
             {
@@ -34,7 +35,7 @@ namespace myshop.Business.Services.Implementations
                 file.CopyTo(filestream);
             }
 
-            return Path.Combine("Images", folderName, filename + ext);
+            return Path.Combine("uploads", folderName, filename + ext).Replace("\\", "/");
         }
 
         public void DeleteFile(string relativePath)
@@ -47,6 +48,29 @@ namespace myshop.Business.Services.Implementations
             {
                 File.Delete(fullPath);
             }
+        }
+
+        public (bool IsValid, string ErrorMessage) ValidateImage(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return (true, string.Empty); // الصورة اختيارية في بعض الحالات
+
+            // 1. Check File Size (Max 2 MB = 2 * 1024 * 1024 bytes)
+            if (file.Length > 2 * 1024 * 1024)
+            {
+                return (false, "File size must be less than 2 MB.");
+            }
+
+            // 2. Check Extension
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+            if (Array.IndexOf(allowedExtensions, extension) < 0)
+            {
+                return (false, "Invalid file format. Only JPG, JPEG, PNG, and WEBP files are allowed.");
+            }
+
+            return (true, string.Empty);
         }
     }
 }

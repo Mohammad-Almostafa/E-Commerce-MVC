@@ -1,9 +1,12 @@
-﻿@using myshop.DataAccess.Entities
-@model IEnumerable<Category>
+﻿@using myshop.DataAccess.Common
+@using myshop.DataAccess.Entities
+@model PagedResult<Category>
 
 @{
     ViewBag.PageTitle = "Category Management";
     ViewBag.CardTitle = "View Categories";
+    Layout = "~/Views/Shared/_Dashboard.cshtml";
+    var paramsObj = ViewBag.Parameters as QueryParameters ?? new QueryParameters();
 }
 
 <!-- Icons -->
@@ -119,10 +122,54 @@
         <h4><i class="fa-solid fa-folder-open me-2"></i> @ViewBag.CardTitle</h4>
     </div>
 
-    <div class="top-btn">
-        <a class="btn btn-primary" href="/Admin/Category/Create">
-            <i class="fa-solid fa-circle-plus me-1"></i> Create Category
-        </a>
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <a class="btn btn-primary" asp-area="Admin" asp-controller="Category" asp-action="Create">
+                <i class="fa-solid fa-circle-plus me-1"></i> Create Category
+            </a>
+        </div>
+
+        <!-- Search, Sort & Page Size Form -->
+        <form method="get" asp-area="Admin" asp-controller="Category" asp-action="Index" class="d-flex align-items-center gap-2 flex-wrap">
+            <!-- Search Box -->
+            <div class="input-group" style="width: 250px;">
+                <input type="text" name="SearchTerm" value="@paramsObj.SearchTerm" class="form-control" placeholder="Search..." />
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+            </div>
+
+            <!-- Sort Dropdown & Direction Toggle -->
+            <div class="input-group" style="width: 220px;">
+                <select name="SortBy" class="form-select" onchange="this.form.submit()">
+                    <option value="">Sort By</option>
+                    <option value="name" selected="@(paramsObj.SortBy == "name")">Name</option>
+                    <option value="date" selected="@(paramsObj.SortBy == "date")">Date Created</option>
+                </select>
+
+                <input type="hidden" name="SortDescending" value="@((!paramsObj.SortDescending).ToString().ToLower())" id="sortCategoryDir" disabled />
+                <button type="submit" class="btn btn-outline-secondary" onclick="document.getElementById('sortCategoryDir').disabled = false;">
+                    @if (paramsObj.SortDescending)
+                    {
+                        <i class="fa-solid fa-arrow-down-z-a"></i>
+                    }
+                    else
+                    {
+                        <i class="fa-solid fa-arrow-up-a-z"></i>
+                    }
+                </button>
+            </div>
+
+            <!-- Page Size -->
+            <div class="input-group" style="width: 140px;">
+                <select name="PageSize" class="form-select" onchange="this.form.submit()">
+                    <option value="2" selected="@(paramsObj.PageSize == 2)">2 / page</option>
+                    <option value="5" selected="@(paramsObj.PageSize == 5)">5 / page</option>
+                    <option value="10" selected="@(paramsObj.PageSize == 10)">10 / page</option>
+                    <option value="20" selected="@(paramsObj.PageSize == 20)">20 / page</option>
+                </select>
+            </div>
+        </form>
     </div>
 
     <table class="table-custom">
@@ -135,23 +182,76 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model)
+            @foreach (var item in Model.Items)
             {
                 <tr>
                     <td>@item.Name</td>
                     <td>@Html.Raw(item.Description)</td>
                     <td>@item.CreatedAt.ToString("dd MMM yyyy")</td>
                     <td>
-                        <a class="btn btn-success me-1" href="/Admin/Category/Edit/@item.Id">
+                        <a class="btn btn-success me-1"
+                           asp-area="Admin"
+                           asp-controller="Category"
+                           asp-action="Edit"
+                           asp-route-id="@item.Id">
                             <i class="fa-solid fa-pen-to-square"></i> Edit
                         </a>
-                        <a class="btn btn-danger" href="/Admin/Category/Delete/@item.Id">
-                            <i class="fa-solid fa-trash"></i> Delete
-                        </a>
+                        <form asp-action="DeleteCategory" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to permanently delete this category?');">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <button type="submit" class="action-btn btn-danger">
+                                <i class="fa-solid fa-trash-can me-1"></i> Delete
+                            </button>
+                        </form>
                     </td>
                 </tr>
             }
         </tbody>
     </table>
+
+    @if (Model.MetaData.TotalPages > 1)
+    {
+        <nav class="d-flex justify-content-center mt-4">
+            <ul class="pagination">
+                <li class="page-item @(!Model.MetaData.HasPrevious ? "disabled" : "")">
+                    <a class="page-link"
+                       asp-area="Admin"
+                       asp-controller="Category"
+                       asp-action="Index"
+                       asp-route-pageNumber="@(Model.MetaData.CurrentPage - 1)"
+                       asp-route-pageSize="@Model.MetaData.PageSize"
+                       asp-route-searchTerm="@paramsObj.SearchTerm"
+                       asp-route-sortBy="@paramsObj.SortBy"
+                       asp-route-sortDescending="@paramsObj.SortDescending">Previous</a>
+                </li>
+
+                @for (int i = 1; i <= Model.MetaData.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.MetaData.CurrentPage ? "active" : "")">
+                        <a class="page-link"
+                           asp-area="Admin"
+                           asp-controller="Category"
+                           asp-action="Index"
+                           asp-route-pageNumber="@i"
+                           asp-route-pageSize="@Model.MetaData.PageSize"
+                           asp-route-searchTerm="@paramsObj.SearchTerm"
+                           asp-route-sortBy="@paramsObj.SortBy"
+                           asp-route-sortDescending="@paramsObj.SortDescending">@i</a>
+                    </li>
+                }
+
+                <li class="page-item @(!Model.MetaData.HasNext ? "disabled" : "")">
+                    <a class="page-link"
+                       asp-area="Admin"
+                       asp-controller="Category"
+                       asp-action="Index"
+                       asp-route-pageNumber="@(Model.MetaData.CurrentPage + 1)"
+                       asp-route-pageSize="@Model.MetaData.PageSize"
+                       asp-route-searchTerm="@paramsObj.SearchTerm"
+                       asp-route-sortBy="@paramsObj.SortBy"
+                       asp-route-sortDescending="@paramsObj.SortDescending">Next</a>
+                </li>
+            </ul>
+        </nav>
+    }
 
 </div>

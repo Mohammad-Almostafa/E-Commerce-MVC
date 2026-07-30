@@ -100,7 +100,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Views\Shared\Components\" />
     <Folder Include="wwwroot\Images\Products\" />
     <Folder Include="wwwroot\NewFolder\" />
   </ItemGroup>

@@ -1,0 +1,73 @@
+﻿@model myshop.Business.DTOs.Cart
+
+@{
+    ViewBag.PageTitle = "Shopping Cart";
+}
+
+<div class="container my-5">
+    <h2 class="mb-4"><i class="fa-solid fa-cart-shopping me-2"></i> Your Shopping Cart</h2>
+
+    @if (!Model.Items.Any())
+    {
+        <div class="alert alert-info text-center p-5">
+            <h4>Your cart is currently empty!</h4>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary mt-3">Start Shopping</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle text-center">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Image</th>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        <tr>
+                            <td>
+                                <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? Url.Content("~/images/placeholder.png") : Url.Content("~/" + item.ImageUrl))"
+                                     alt="@item.ProductName" style="width: 60px; height: 60px; object-fit: cover;" class="rounded" />
+                            </td>
+                            <td class="fw-bold">@item.ProductName</td>
+                            <td>$@item.Price.ToString("F2")</td>
+                            <td>
+                                <div class="d-flex justify-content-center align-items-center gap-2">
+                                    <a asp-action="Decrease" asp-route-productId="@item.ProductId" class="btn btn-sm btn-outline-secondary">-</a>
+                                    <span class="fw-bold px-2">@item.Quantity</span>
+                                    <a asp-action="Increase" asp-route-productId="@item.ProductId" class="btn btn-sm btn-outline-secondary">+</a>
+                                </div>
+                            </td>
+                            <td class="fw-bold text-success">$@item.Total.ToString("F2")</td>
+                            <td>
+                                <a asp-action="Remove" asp-route-productId="@item.ProductId" class="btn btn-sm btn-danger">
+                                    <i class="fa-solid fa-trash"></i> Remove
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-4 p-3 bg-light rounded border">
+            <div>
+                <a asp-action="Clear" class="btn btn-outline-danger">
+                    <i class="fa-solid fa-broom me-1"></i> Clear Cart
+                </a>
+            </div>
+            <div class="text-end">
+                <h4>Order Total: <span class="text-primary">$@Model.OrderTotal.ToString("F2")</span></h4>
+                <button class="btn btn-success btn-lg mt-2">Proceed to Checkout</button>
+            </div>
+        </div>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-primary mt-3">Back To Shopping</a>
+    }
+</div>

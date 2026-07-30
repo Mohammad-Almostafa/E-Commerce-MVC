@@ -6,3 +6,60 @@
     <h1 class="display-4">Welcome TO VS</h1>
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
+
+<div class="container my-4">
+    <!-- Search, Sort & Page Size Bar -->
+    <form method="get" asp-controller="Home" asp-action="Index" class="row g-3 mb-4 align-items-center">
+        <!-- 1. Search Box -->
+        <div class="col-md-5">
+            <div class="input-group">
+                <input type="text" name="SearchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Search by name, description or price..." />
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-magnifying-glass"></i> Search
+                </button>
+            </div>
+        </div>
+
+        <!-- 2. Sort Dropdown & Direction Toggle Button -->
+        <div class="col-md-4">
+            <div class="input-group">
+                <select name="SortBy" class="form-select" onchange="this.form.submit()">
+                    <option value="">Sort By Default</option>
+                    <option value="name" selected="@(Model.SortBy == "name")">Name</option>
+                    <option value="price" selected="@(Model.SortBy == "price")">Price</option>
+                </select>
+                
+                <!-- Hidden input to toggle SortDescending -->
+                <input type="hidden" name="SortDescending" value="@((!Model.SortDescending).ToString().ToLower())" id="sortDirInput" disabled />
+                
+                <!-- Direction Arrow Toggle Button -->
+                <button type="submit" class="btn btn-outline-secondary" onclick="document.getElementById('sortDirInput').disabled = false;" title="Toggle Direction">
+                    @if (Model.SortDescending)
+                    {
+                        <i class="fa-solid fa-arrow-down-z-a"></i> <span class="d-none d-lg-inline">Desc</span>
+                    }
+                    else
+                    {
+                        <i class="fa-solid fa-arrow-up-a-z"></i> <span class="d-none d-lg-inline">Asc</span>
+                    }
+                </button>
+            </div>
+        </div>
+
+        <!-- 3. Page Size Selector -->
+        <div class="col-md-3">
+            <div class="input-group">
+                <label class="input-group-text" for="pageSizeSelect">Page Size</label>
+                <select name="PageSize" id="pageSizeSelect" class="form-select" onchange="this.form.submit()">
+                    <option value="2" selected="@(Model.PageSize == 2)">2</option>
+                    <option value="5" selected="@(Model.PageSize == 5)">5</option>
+                    <option value="10" selected="@(Model.PageSize == 10)">10</option>
+                    <option value="20" selected="@(Model.PageSize == 20)">20</option>
+                </select>
+            </div>
+        </div>
+    </form>
+
+    <!-- Render Product List ViewComponent -->
+    @await Component.InvokeAsync("ProductList", new { parameters = Model })
+</div>

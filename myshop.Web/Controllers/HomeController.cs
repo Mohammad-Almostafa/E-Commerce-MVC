@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using myshop.DataAccess.Common;
 using myshop.Entities.Models;
 using System.Diagnostics;
 
@@ -13,9 +14,9 @@ namespace myshop.Web.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(QueryParameters parameters)
         {
-            return View();
+            return View(parameters);
         }
 
         public IActionResult Privacy()

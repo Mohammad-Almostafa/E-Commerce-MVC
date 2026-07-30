@@ -139,7 +139,8 @@
                     <label asp-for="Product.Img" class="form-label">
                         <i class="fa-solid fa-image me-1"></i> Product Image
                     </label>
-                    <input type="file" name="file" id="imgfile" class="form-control" onchange="fillimg(event);" />
+                    <input type="file" name="file" id="imgfile" class="form-control" accept=".jpg,.jpeg,.png,.webp" onchange="fillimg(event);" />
+                    <span class="text-danger" data-valmsg-for="file" data-valmsg-replace="true"></span>
                 </div>
 
                 <div class="mb-3">
@@ -162,8 +163,13 @@
                 </div>
             </form>
 
-            <div class="mt-4 text-center">
+            @* <div class="mt-4 text-center">
                 <img id="ImagePreview" src="~/@Model.Product.Img" />
+            </div> *@
+            <div class="mt-4 text-center">
+                <img id="ImagePreview" 
+                    src="@(string.IsNullOrEmpty(Model.Product.Img) ? Url.Content("~/images/placeholder.png") : Url.Content("~/" + Model.Product.Img))"
+                     alt="Product Image" />
             </div>
 
         </div>

@@ -1,0 +1,101 @@
+﻿@using System.Globalization
+@using myshop.DataAccess.Common
+@using myshop.DataAccess.Entities
+
+@model PagedResult<Product>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    @if (!Model.Items.Any())
+    {
+        <div class="col-12 text-center my-5">
+            <h4 class="text-muted">No products found.</h4>
+        </div>
+    }
+    else
+    {
+        @foreach (var product in Model.Items)
+        {
+            <div class="col mb-4">
+                <div class="card h-100 shadow-sm">
+                    <a asp-action="ProductDetails" asp-controller="Home" asp-route-id="@product.Id">
+                        <img class="card-img-top"
+                             src="@(string.IsNullOrEmpty(product.Img) ? Url.Content("~/images/placeholder.png") : Url.Content("~/" + product.Img))"
+                             alt="@product.Name"
+                             style="height: 200px; object-fit: cover;" />
+                    </a>
+
+                    <div class="card-body p-4">
+                        <div class="text-center">
+                            <h5 class="fw-bolder">@product.Name</h5>
+                            <span class="badge bg-secondary mb-2">@product.Category?.Name</span>
+                            <div class="text-primary fw-bold fs-5">
+                                @product.Price.ToString("c", new CultureInfo("en-US"))
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                        <div class="text-center">
+                            <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                                <input type="hidden" name="productId" value="@product.Id" />
+                                <input type="hidden" name="quantity" value="1" />
+                                <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+
+                                <button type="submit" class="btn btn-outline-dark mt-auto">
+                                    <i class="fa-solid fa-cart-plus me-1"></i> Add to cart
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<!-- Pagination UI -->
+@if (Model.MetaData.TotalPages > 1)
+{
+    <nav class="d-flex justify-content-center mt-4">
+        <ul class="pagination">
+            <!-- Previous Button -->
+            <li class="page-item @(!Model.MetaData.HasPrevious ? "disabled" : "")">
+                <a class="page-link"
+                   asp-controller="Home"
+                   asp-action="Index"
+                   asp-route-pageNumber="@(Model.MetaData.CurrentPage - 1)"
+                   asp-route-pageSize="@Model.MetaData.PageSize"
+                   asp-route-searchTerm="@Context.Request.Query["SearchTerm"]"
+                   asp-route-sortBy="@Context.Request.Query["SortBy"]"
+                   asp-route-sortDescending="@Context.Request.Query["SortDescending"]">Previous</a>
+            </li>
+
+            <!-- Page Numbers -->
+            @for (int i = 1; i <= Model.MetaData.TotalPages; i++)
+            {
+                <li class="page-item @(i == Model.MetaData.CurrentPage ? "active" : "")">
+                    <a class="page-link"
+                       asp-controller="Home"
+                       asp-action="Index"
+                       asp-route-pageNumber="@i"
+                       asp-route-pageSize="@Model.MetaData.PageSize"
+                       asp-route-searchTerm="@Context.Request.Query["SearchTerm"]"
+                       asp-route-sortBy="@Context.Request.Query["SortBy"]"
+                       asp-route-sortDescending="@Context.Request.Query["SortDescending"]">@i</a>
+                </li>
+            }
+
+            <!-- Next Button -->
+            <li class="page-item @(!Model.MetaData.HasNext ? "disabled" : "")">
+                <a class="page-link"
+                   asp-controller="Home"
+                   asp-action="Index"
+                   asp-route-pageNumber="@(Model.MetaData.CurrentPage + 1)"
+                   asp-route-pageSize="@Model.MetaData.PageSize"
+                   asp-route-searchTerm="@Context.Request.Query["SearchTerm"]"
+                   asp-route-sortBy="@Context.Request.Query["SortBy"]"
+                   asp-route-sortDescending="@Context.Request.Query["SortDescending"]">Next</a>
+            </li>
+        </ul>
+    </nav>
+}

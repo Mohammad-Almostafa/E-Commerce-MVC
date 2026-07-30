@@ -1,7 +1,10 @@
 ﻿@using Microsoft.AspNetCore.Identity
+@using myshop.Business.Services.Interfaces
 @using myshop.DataAccess.Entities
+
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
+@inject ICartService CartService
 
 <!DOCTYPE html>
 <html lang="en">
@@ -149,6 +152,18 @@
                                 <span class="nav-welcome-text text-dark">
                                     Hello, @((await UserManager.GetUserAsync(User))?.Name ?? User.Identity?.Name)
                                 </span>
+                            </li>
+                            <li>
+                                @{
+                                    var cart = CartService.GetCart();
+                                    var itemCount = cart.Items.Sum(x => x.Quantity);
+                                }
+                                <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-dark position-relative me-3">
+                                    <i class="fa-solid fa-cart-shopping me-1"></i> Cart
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        @itemCount
+                                    </span>
+                                </a>
                             </li>
                             <li class="nav-item">
                                 <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">

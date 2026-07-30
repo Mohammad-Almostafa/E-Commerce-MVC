@@ -22,14 +22,14 @@ namespace myshop.Web.Areas.Admin.Controllers
             this.fileService = fileService;
         }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
+        //public IActionResult Index()
+        //{
+        //    return View();
+        //}
 
         //src.Adapt(dest)
         [HttpGet]
-        public async Task<IActionResult> GetData()
+        public async Task<IActionResult> Index()
         {
             var products = await unitOfWork.Products.GetAllWithCategoryAsync();
 
@@ -39,7 +39,7 @@ namespace myshop.Web.Areas.Admin.Controllers
 
             var productDto = products.Adapt<List<ProductListDTO>>();
 
-            return Json(new { data = productDto });
+            return View(productDto);
         }
 
         [HttpGet]
@@ -61,6 +61,16 @@ namespace myshop.Web.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(ProductVM productVM,IFormFile file)
         {
+            // 1. Validate Image File (Size & Extension)
+            if (file != null)
+            {
+                var validation = fileService.ValidateImage(file);
+                if (!validation.IsValid)
+                {
+                    ModelState.AddModelError("file", validation.ErrorMessage);
+                }
+            }
+
             if (ModelState.IsValid)
             {
                 if (file != null)
@@ -73,6 +83,14 @@ namespace myshop.Web.Areas.Admin.Controllers
                 TempData["Create"] = "Item has Created Successfully";
                 return RedirectToAction("Index");
             }
+            // إعادة تحميل القائمة في حال وجود خطأ بالمدخلات
+            var categories = await unitOfWork.Categories.GetAllAsync();
+            productVM.CategoryList = categories.Select(x => new SelectListItem
+            {
+                Text = x.Name,
+                Value = x.Id.ToString()
+            });
+
             return View(productVM.Product);
         }
         [HttpGet]
@@ -99,28 +117,54 @@ namespace myshop.Web.Areas.Admin.Controllers
         }
         
         [HttpPost]
-        public IActionResult Edit(ProductVM productVM, IFormFile? file)
+        public async Task<IActionResult> Edit(ProductVM productVM, IFormFile? file)
         {
+            // 1. Validate Image File if uploaded
+            if (file != null)
+            {
+                var validation = fileService.ValidateImage(file);
+                if (!validation.IsValid)
+                {
+                    ModelState.AddModelError("file", validation.ErrorMessage);
+                }
+            }
+
             if (ModelState.IsValid)
             {
                 if (file != null)
                 {
+                    // حذف الصورة القديمة لمنع وجود Orphan Files
+                    if (!string.IsNullOrEmpty(productVM.Product.Img))
+                    {
+                        fileService.DeleteFile(productVM.Product.Img);
+                    }
+
                     productVM.Product.Img = fileService.UploadFile(file, "Products");
                 }
 
-                unitOfWork.Products.UpdateAsync(productVM.Product);
-                unitOfWork.CompleteAsync();
+                await unitOfWork.Products.UpdateAsync(productVM.Product);
+                await unitOfWork.CompleteAsync();
 
                 TempData["Update"] = "Data has Updated Successfully";
                 return RedirectToAction("Index");
             }
 
+            // إعادة تحميل القائمة في حال وجود خطأ بالمدخلات
+            var categories = await unitOfWork.Categories.GetAllAsync();
+            productVM.CategoryList = categories.Select(x => new SelectListItem
+            {
+                Text = x.Name,
+                Value = x.Id.ToString()
+            });
+
             return View(productVM.Product);
         }
         
-        [HttpDelete]
-        public async Task<IActionResult> Delete(int? id)
+        [HttpPost]
+        public async Task<IActionResult> DeleteProduct(int? id)
         {
+            if (id == null) return Json(new { success = false, message = "Invalid ID" });
+
             var productIndb = await unitOfWork.Products.GetByIdAsync(id.Value);
 
             if (productIndb == null)
@@ -128,13 +172,15 @@ namespace myshop.Web.Areas.Admin.Controllers
                 return Json(new { success = false, message = "Error while Deleting" });
             }
 
+            // 1. حذف الصورة الفيزيائية أولاً
+            if (!string.IsNullOrEmpty(productIndb.Img))
+            {
+                fileService.DeleteFile(productIndb.Img);
+            }
             await unitOfWork.Products.DeleteAsync(productIndb);
-
-            fileService.DeleteFile(productIndb.Img);
-
             await unitOfWork.CompleteAsync();
-
-            return Json(new { success = true, message = "file has been Deleted" });
+            TempData["Delete"] = "Item has Deleted Successfully";
+            return RedirectToAction("index");
         }
 
 

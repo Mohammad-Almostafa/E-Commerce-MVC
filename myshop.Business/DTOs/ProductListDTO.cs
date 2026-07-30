@@ -3,9 +3,10 @@
     public class ProductListDTO
     {
         public int Id { get; set; }
-        public int Name { get; set; }
-        public int Description { get; set; }
-        public int Price { get; set; }
-        public int CategoryName { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public decimal Price { get; set; }
+        public string CategoryName { get; set; }
     }
 }

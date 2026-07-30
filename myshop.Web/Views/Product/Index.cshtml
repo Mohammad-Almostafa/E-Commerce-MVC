@@ -1,4 +1,7 @@
-﻿@{
+﻿@using myshop.Business.DTOs
+@model IEnumerable<ProductListDTO>
+
+@{
     ViewBag.PageTitle = "Products Management";
     ViewBag.CardTitle = "View Products";
     Layout = "~/Views/Shared/_Dashboard.cshtml";
@@ -124,9 +127,37 @@
                 <th>Description</th>
                 <th>Price</th>
                 <th>Category</th>
-                <th style="width:130px;">Actions</th>
+                <th>CreatedAt</th>
+                <th>Actions</th>
             </tr>
         </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@Html.Raw(item.Description)</td>
+                    <td>@item.Price</td>
+                    <td>@item.CategoryName</td>
+                    <td>@item.CreatedAt.ToString("dd MMM yyyy")</td>
+                    <td>
+                        <a class="btn btn-success me-1"
+                            asp-area="Admin"
+                            asp-controller="Category"
+                            asp-action="Edit"
+                            asp-route-id="@item.Id">
+                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                        </a>
+                        <form asp-controller="Product" asp-action="DeleteProduct" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to permanently delete this product?');">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fa-solid fa-trash"></i> Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
     </table>
 
 </div>

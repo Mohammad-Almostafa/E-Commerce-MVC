@@ -1,7 +1,9 @@
 ﻿using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using myshop.Business.DTOs;
+using myshop.DataAccess.Common;
 using myshop.DataAccess.Entities;
 using myshop.DataAccess.Rebositories.Interfaces;
 
@@ -11,15 +13,30 @@ namespace myshop.Web.Areas.Admin.Controllers
     public class CategoryController : Controller
     {
         private readonly IUnitOfWork unitOfWork;
-         
-        public CategoryController(IUnitOfWork unitOfWork)
+        private readonly IMemoryCache memoryCache;
+        private const string CategoryCacheKey = "Categories_List";
+
+        public CategoryController(IUnitOfWork unitOfWork, IMemoryCache memoryCache)
         {
             this.unitOfWork = unitOfWork;
+            this.memoryCache = memoryCache;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(QueryParameters parameters)
         {
-            var categories = await unitOfWork.Categories.GetAllAsync();
+            if (!memoryCache.TryGetValue(CategoryCacheKey, out PagedResult<Category>? categories))
+            {
+                categories = await unitOfWork.Categories.SearchAsync(parameters.SearchTerm, parameters);
+
+                var cacheOptions = new MemoryCacheEntryOptions()
+                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(30));
+
+                memoryCache.Set(CategoryCacheKey, categories, cacheOptions);
+            }
+
+            categories = await unitOfWork.Categories.SearchAsync(parameters.SearchTerm, parameters);
+            
+            ViewBag.Parameters = parameters;
             return View(categories);
         }
 
@@ -27,7 +44,7 @@ namespace myshop.Web.Areas.Admin.Controllers
         public IActionResult Create()
         {
 
-            return View();
+            return View(new Category());
         }
 
         [HttpPost]
@@ -38,6 +55,9 @@ namespace myshop.Web.Areas.Admin.Controllers
             {
                 await unitOfWork.Categories.AddAsync(category);
                 await unitOfWork.CompleteAsync();
+
+                memoryCache.Remove(CategoryCacheKey);
+
                 TempData["Create"] = "Item has Created Successfully";
                 return RedirectToAction("Index");
             }
@@ -64,24 +84,27 @@ namespace myshop.Web.Areas.Admin.Controllers
             {
                 await unitOfWork.Categories.UpdateAsync(category);
                 await unitOfWork.CompleteAsync();
+
+                memoryCache.Remove(CategoryCacheKey);
+
                 TempData["Update"] = "Data has Updated Successfully";
                 return RedirectToAction("Index");
             }
             return View(category);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null | id == 0)
-            {
-                NotFound();
-            }
-            var categoryIndb = await unitOfWork.Categories.GetByIdAsync(id.Value);
+        //[HttpGet]
+        //public async Task<IActionResult> Delete(int? id)
+        //{
+        //    if (id == null | id == 0)
+        //    {
+        //        NotFound();
+        //    }
+        //    var categoryIndb = await unitOfWork.Categories.GetByIdAsync(id.Value);
 
-            return View(categoryIndb);
-        }
-
+        //    return View(categoryIndb);
+        //}
+        [ValidateAntiForgeryToken]
         [HttpPost]
         public async Task<IActionResult> DeleteCategory(int? id)
         {
@@ -92,6 +115,9 @@ namespace myshop.Web.Areas.Admin.Controllers
             }
             await unitOfWork.Categories.DeleteAsync(categoryIndb);
             await unitOfWork.CompleteAsync();
+
+            memoryCache.Remove(CategoryCacheKey);
+
             TempData["Delete"] = "Item has Deleted Successfully";
             return RedirectToAction("Index");
         }

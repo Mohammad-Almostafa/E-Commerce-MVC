@@ -53,12 +53,22 @@ builder.Services.AddAuthorization(options =>
 //services
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddScoped<ICartService, CartService>();
 
+// 1. Register HttpContextAccessor & DistributedMemoryCache for Session
 builder.Services.AddHttpContextAccessor();
-
-
 builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession();
+
+// 2. Register Session with options
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // „œ… ’·«ÕÌ… «·Ã·”…
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+builder.Services.AddMemoryCache();
+
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
@@ -99,10 +109,10 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseSession();
+
 app.UseAuthentication(); // „‰ √‰ ø
 app.UseAuthorization();  // „« ÂÌ ’·«ÕÌ« ﬂø
-
-app.UseSession();
 
 app.MapRazorPages();
 //app.MapControllerRoute(
