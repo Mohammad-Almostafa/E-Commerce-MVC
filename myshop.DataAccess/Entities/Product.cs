@@ -12,7 +12,6 @@ namespace myshop.DataAccess.Entities
 {
     public class Product : BaseEntity
     {
-        [Required]
         public string Name { get; set; }
         public string Description { get; set; }
 
@@ -20,14 +19,14 @@ namespace myshop.DataAccess.Entities
         [ValidateNever]
         public string Img { get; set; }
 
-        [Required]
         public decimal Price { get; set; }
 
-        [Required]
         [DisplayName("Category")]
         public int CategoryId { get; set; }
 
         [ValidateNever]
         public Category Category { get; set; }
+
+        public ICollection<Review> Reviews { get; set; } = new List<Review>();
     }
 }

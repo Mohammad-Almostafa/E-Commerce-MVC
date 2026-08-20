@@ -1,0 +1,93 @@
+﻿@model myshop.Web.ViewModels.CheckoutVM
+
+@{
+    ViewBag.PageTitle = "Checkout";
+}
+
+<div class="container my-5">
+    <h2 class="mb-4"><i class="fa-solid fa-credit-card me-2"></i> Checkout</h2>
+
+    <form asp-action="Checkout" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="row g-4">
+            <!-- Summary Column -->
+            <div class="col-md-5 order-md-2">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="card-title mb-0">Order Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush mb-3">
+                            @foreach (var item in Model.Cart.Items)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div>
+                                        <h6 class="my-0">@item.ProductName</h6>
+                                        <small class="text-muted">Quantity: @item.Quantity × $@item.Price.ToString("F2")</small>
+                                    </div>
+                                    <span class="text-muted">$@item.Total.ToString("F2")</span>
+                                </li>
+                            }
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0 fw-bold border-top">
+                                <span>Total Amount</span>
+                                <strong class="text-primary fs-5">$@Model.Cart.OrderTotal.ToString("F2")</strong>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shipping Details Form Column -->
+            <div class="col-md-7 order-md-1">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">Shipping & Contact Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label">Full Name</label>
+                            <input asp-for="Name" class="form-control" placeholder="Enter your full name" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
+                            <input asp-for="PhoneNumber" class="form-control" placeholder="05XXXXXXXX" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="City" class="form-label">City</label>
+                            <input asp-for="City" class="form-control" placeholder="Enter city" />
+                            <span asp-validation-for="City" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Address" class="form-label">Shipping Address</label>
+                            <textarea asp-for="Address" class="form-control" rows="3" placeholder="Enter full address details"></textarea>
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fa-solid fa-arrow-left me-1"></i> Back to Cart
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                Place Order ($@Model.Cart.OrderTotal.ToString("F2"))
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

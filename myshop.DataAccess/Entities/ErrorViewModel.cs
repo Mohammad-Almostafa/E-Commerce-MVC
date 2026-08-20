@@ -1,6 +1,8 @@
+using myshop.DataAccess.Common;
+
 namespace myshop.Entities.Models
 {
-    public class ErrorViewModel
+    public class ErrorViewModel : BaseEntity
     {
         public string? RequestId { get; set; }
 

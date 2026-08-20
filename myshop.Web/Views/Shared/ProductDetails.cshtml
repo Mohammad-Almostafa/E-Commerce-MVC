@@ -1,0 +1,139 @@
+﻿@model myshop.Web.ViewModels.ProductDetailsVM
+@using System.Security.Claims
+
+<div class="container mt-5">
+    <hr />
+    <h3 class="mb-4"><i class="fa-solid fa-star text-warning me-2"></i>Customer Reviews</h3>
+
+    <!-- Summary Section -->
+    <div class="row mb-4">
+        <div class="col-md-4 text-center border-end">
+            <h1 class="display-4 fw-bold text-primary">@Model.AverageRating.ToString("0.0")</h1>
+            <div class="text-warning mb-2 fs-5">
+                @for (int i = 1; i <= 5; i++)
+                {
+                    <i class="@(i <= Math.Round(Model.AverageRating) ? "fa-solid fa-star" : "fa-regular fa-star text-muted")"></i>
+                }
+            </div>
+            <p class="text-muted">Based on @Model.ReviewCount review(s)</p>
+        </div>
+
+        <div class="col-md-8 ps-md-4">
+            @if (User.Identity.IsAuthenticated)
+            {
+                @if (Model.UserHasReviewed)
+                {
+                    <!-- إذا كان المستخدم قد قيّم المنتج سابقاً (منع التقييم المكرر) -->
+                    <div class="alert alert-info shadow-sm">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="alert-heading mb-0"><i class="fa-solid fa-user-check me-2"></i>Your Review</h5>
+                            <div>
+                                <!-- زر التعديل (يفتح modal للتعديل أو نموذج) -->
+                                <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="collapse" data-bs-target="#editReviewForm">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </button>
+                                <!-- زر الحذف -->
+                                <form asp-controller="Review" asp-action="Delete" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete your review?');">
+                                    <input type="hidden" name="id" value="@Model.UserReview!.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="fa-solid fa-trash"></i> Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="text-warning my-2">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <i class="@(i <= Model.UserReview!.Rating ? "fa-solid fa-star" : "fa-regular fa-star text-muted")"></i>
+                            }
+                        </div>
+                        <p class="mb-1">@Model.UserReview.Comment</p>
+                        <small class="text-muted">Posted on @Model.UserReview.CreatedAt.ToString("MMM dd, yyyy")</small>
+                    </div>
+
+                    <!-- Form التعديل المخفي يظهر عند الضغط على Edit -->
+                    <div class="collapse mt-3" id="editReviewForm">
+                        <div class="card card-body bg-light">
+                            <h6>Edit Your Review</h6>
+                            <form asp-controller="Review" asp-action="Edit" method="post">
+                                <input type="hidden" name="id" value="@Model.UserReview.Id" />
+                                <div class="mb-3">
+                                    <label class="form-label">Rating</label>
+                                    <select name="rating" class="form-select" required>
+                                        @for (int i = 5; i >= 1; i--)
+                                        {
+                                            <option value="@i" selected="@(i == Model.UserReview.Rating)">@i Stars</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Comment</label>
+                                    <textarea name="comment" class="form-control" rows="3" required>@Model.UserReview.Comment</textarea>
+                                </div>
+                                <button type="submit" class="btn btn-success btn-sm">Update Review</button>
+                            </form>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <!-- Form إضافة تقييم جديد (يظهر فقط إذا لم يسبق له التقييم) -->
+                    <div class="card p-3 bg-light shadow-sm">
+                        <h5 class="mb-3">Leave a Review</h5>
+                        <form asp-controller="Review" asp-action="Add" method="post">
+                            <input type="hidden" name="productId" value="@Model.Product.Id" />
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Rating</label>                                <select name="rating" class="form-select" required>
+                                    <option value="5">5 Stars - Excellent</option>
+                                    <option value="4">4 Stars - Very Good</option>
+                                    <option value="3">3 Stars - Average</option>
+                                    <option value="2">2 Stars - Poor</option>
+                                    <option value="1">1 Star - Terrible</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Your Review</label>
+                                <textarea name="comment" class="form-control" rows="3" placeholder="What did you like or dislike about this product?" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit Review</button>
+                        </form>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="alert alert-warning">
+                    <i class="fa-solid fa-lock me-2"></i>Please <a asp-area="Identity" asp-page="/Account/Login" class="alert-link">Sign In</a> to leave a review.
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Reviews List Section -->
+    <h4 class="mb-3">All Reviews</h4>
+    @if (!Model.Reviews.Any())
+    {
+        <p class="text-muted">No reviews yet. Be the first to review this product!</p>
+    }
+    else
+    {
+        <div class="list-group">
+            @foreach (var review in Model.Reviews)
+            {
+                <div class="list-group-item p-3 mb-2 shadow-sm rounded">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold mb-0">@review.ApplicationUser?.UserName</h6>
+                        <small class="text-muted">@review.CreatedAt.ToString("MMM dd, yyyy")</small>
+                    </div>
+                    <div class="text-warning my-1">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <i class="@(i <= review.Rating ? "fa-solid fa-star" : "fa-regular fa-star text-muted")"></i>
+                        }
+                    </div>
+                    <p class="mb-0 text-secondary">@review.Comment</p>
+                </div>
+            }
+        </div>
+    }
+</div>

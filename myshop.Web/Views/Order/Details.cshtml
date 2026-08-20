@@ -1,0 +1,111 @@
+﻿@model myshop.Web.ViewModels.OrderVM
+
+@{
+    ViewBag.PageTitle = $"Order #{Model.OrderHeader.Id} Details";
+}
+
+<div class="container my-5">
+    <!-- Header Controls -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="fa-solid fa-receipt me-2"></i> Order Details #@Model.OrderHeader.Id
+        </h2>
+        <a asp-controller="Order" asp-action="Index" class="btn btn-outline-secondary">
+            <i class="fa-solid fa-arrow-left me-1"></i> Back to Orders
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <!-- Shipping & Order Info Summary -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="card-title mb-0"><i class="fa-solid fa-truck me-2"></i> Shipping Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="fw-bold text-muted">Customer Name:</label>
+                        <p class="fs-6 mb-0">@Model.OrderHeader.Name</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="fw-bold text-muted">Phone Number:</label>
+                        <p class="fs-6 mb-0">@Model.OrderHeader.PhoneNumber</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="fw-bold text-muted">City:</label>
+                        <p class="fs-6 mb-0">@Model.OrderHeader.City</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="fw-bold text-muted">Address:</label>
+                        <p class="fs-6 mb-0">@Model.OrderHeader.Address</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0"><i class="fa-solid fa-info-circle me-2"></i> Order Meta</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Order Date:</span>
+                        <span>@Model.OrderHeader.OrderDate.ToString("yyyy-MM-dd HH:mm")</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Order Status:</span>
+                        <span class="badge bg-success">@Model.OrderHeader.OrderStatus</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Payment Status:</span>
+                        <span class="badge bg-info text-dark">@Model.OrderHeader.PaymentStatus</span>
+                    </div>
+                    <hr />
+                    <div class="d-flex justify-content-between fw-bold fs-5">
+                        <span>Total Paid:</span>
+                        <span class="text-primary">$@Model.OrderHeader.TotalPrice.ToString("F2")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ordered Items Table -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="card-title mb-0"><i class="fa-solid fa-boxes-packing me-2"></i> Order Items</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 text-center">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="text-start ps-3">Product</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th class="text-end pe-3">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.OrderDetail)
+                                {
+                                    <tr>
+                                        <td class="text-start ps-3">
+                                            <div class="fw-bold">
+                                                @(item.Product?.Name ?? $"Product #{item.ProductId}")
+                                            </div>
+                                        </td>
+                                        <td>$@item.Price.ToString("F2")</td>
+                                        <td><span class="badge bg-secondary">@item.Count</span></td>
+                                        <td class="text-end pe-3 fw-bold text-success">
+                                            $@((item.Price * item.Count).ToString("F2"))
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

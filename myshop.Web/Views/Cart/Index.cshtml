@@ -65,7 +65,9 @@
             </div>
             <div class="text-end">
                 <h4>Order Total: <span class="text-primary">$@Model.OrderTotal.ToString("F2")</span></h4>
-                <button class="btn btn-success btn-lg mt-2">Proceed to Checkout</button>
+                <a asp-controller="Cart" asp-action="Checkout" class="btn btn-success btn-lg mt-2">
+                    <i class="fa-solid fa-credit-card me-1"></i> Proceed to Checkout
+                </a>
             </div>
         </div>
         <a asp-controller="Home" asp-action="Index" class="btn btn-primary mt-3">Back To Shopping</a>

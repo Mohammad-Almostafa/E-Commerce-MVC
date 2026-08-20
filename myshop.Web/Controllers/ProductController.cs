@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Caching.Memory;
 using myshop.Business.DTOs;
 using myshop.Business.Services.Interfaces;
 using myshop.DataAccess.Entities;
@@ -15,11 +16,13 @@ namespace myshop.Web.Areas.Admin.Controllers
     {
         private readonly IUnitOfWork unitOfWork;
         private readonly IFileService fileService;
+        private readonly IMemoryCache memoryCache;
 
-        public ProductController(IUnitOfWork unitOfWork, IFileService fileService)
+        public ProductController(IUnitOfWork unitOfWork, IFileService fileService, IMemoryCache memoryCache)
         {
             this.unitOfWork = unitOfWork;
             this.fileService = fileService;
+            this.memoryCache = memoryCache;
         }
 
         //public IActionResult Index()
@@ -182,7 +185,34 @@ namespace myshop.Web.Areas.Admin.Controllers
             TempData["Delete"] = "Item has Deleted Successfully";
             return RedirectToAction("index");
         }
+        // عرض المنتجات المؤرشفة
+        [HttpGet]
+        public async Task<IActionResult> ArchivedProducts()
+        {
+            var archivedProducts = await unitOfWork.Products.GetArchivedAsync();
+            return View(archivedProducts);
+        }
 
+        // إجراء الاستعادة عند الضغط على زر Restore
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Restore(int id)
+        {
+            var product = await unitOfWork.Products.GetByIdWithDeletedAsync(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            await unitOfWork.Products.RestoreAsync(product);
+            await unitOfWork.CompleteAsync(); // حفظ التغييرات في قاعدة البيانات
+
+            // تفريغ الكاش لتظهر المنتجات المستعادة في شاشات العرض فوراً
+            memoryCache.Remove("Categories_List");
+
+            TempData["Success"] = "Product restored successfully!";
+            return RedirectToAction(nameof(Index));
+        }
 
     }
 }

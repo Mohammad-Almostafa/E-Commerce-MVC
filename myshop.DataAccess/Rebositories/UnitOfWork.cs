@@ -1,5 +1,4 @@
-﻿using myshop.DataAccess.Entities;
-using myshop.DataAccess.Rebositories;
+﻿using myshop.DataAccess.Rebositories;
 using myshop.DataAccess.Rebositories.Interfaces;
 
 namespace myshop.DataAccess.Repositories
@@ -10,7 +9,14 @@ namespace myshop.DataAccess.Repositories
         
         // قراءة فقط (Read-only properties) للـ Repositories
         public IProduct Products { get; private set; }
+        
         public ICategory Categories { get; private set; }
+
+        public IOrderDetail OrderDetails { get; private set; }
+
+        public IOrderHeader OrderHeaders { get; private set; }
+
+        public IReview Reviews { get; private set; }
 
         // نقوم بحقن الـ ApplicationDbContext ليتشاركه جميع الـ Repositories
         public UnitOfWork(ApplicationDbContext context)
@@ -20,6 +26,9 @@ namespace myshop.DataAccess.Repositories
             // تهيئة الـ Repositories وتمرير الـ Context المشترك لها
             Products = new ProductRepository(_context);
             Categories = new CategoryRepository(_context);
+            OrderDetails = new OrderDetailRepository(_context);
+            OrderHeaders = new OrderHeaderRepository(_context);
+            Reviews = new ReviewRepository(_context);
         }
 
 

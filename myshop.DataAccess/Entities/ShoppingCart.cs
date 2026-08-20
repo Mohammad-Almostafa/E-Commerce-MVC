@@ -1,13 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using myshop.DataAccess.Common;
 using myshop.DataAccess.Entities;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace myshop.Entities.Models
+namespace myshop.DataAccess.Entities.Models
 {
-    public class ShoppingCart
+    public class ShoppingCart : BaseEntity
     {
-        public int Id { get; set; }
-
         public int ProductId { get; set; }
 
         [ForeignKey("ProductId")]

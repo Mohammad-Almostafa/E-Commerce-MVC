@@ -17,12 +17,12 @@ namespace myshop.DataAccess.Rebositories
 
         public async Task<IEnumerable<Product>> GetAllWithCategoryAsync()
         {
-            return await context.Products.Include(x => x.Category).ToListAsync();
+            return await context.Products.AsNoTracking().Include(x => x.Category).Include(p => p.Reviews).ToListAsync();
         }
 
         public async Task<PagedResult<Product>> SearchAsync(string? searchTerm, QueryParameters parameters, CancellationToken cancellationToken = default)
         {
-            var query = context.Products.Include(p => p.Category) as IQueryable<Product>;
+            var query = context.Products.AsNoTracking().Include(p => p.Category).Include(p => p.Reviews) as IQueryable<Product>;
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 var term = searchTerm.ToLower();

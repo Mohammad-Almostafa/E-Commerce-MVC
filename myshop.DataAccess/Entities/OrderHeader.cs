@@ -1,13 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
-using myshop.DataAccess.Entities;
+using myshop.DataAccess.Common;
 
 
-namespace myshop.Entities.Models
+namespace myshop.DataAccess.Entities.Models
 {
-    public class OrderHeader
+    public class OrderHeader : BaseEntity
     {
-        public int Id { get; set; }
-
         public string ApplicationUserId { get; set; }
 
         [ValidateNever]

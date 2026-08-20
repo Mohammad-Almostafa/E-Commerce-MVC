@@ -1,12 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
-using myshop.DataAccess.Entities;
+using myshop.DataAccess.Common;
 
-namespace myshop.Entities.Models
+namespace myshop.DataAccess.Entities.Models
 {
-    public class OrderDetail
+    public class OrderDetail : BaseEntity
     {
-        public int Id { get; set; }
-
         public int OrderHeaderId { get; set; }
         [ValidateNever]
         public OrderHeader OrderHeader { get; set; }
@@ -18,7 +16,5 @@ namespace myshop.Entities.Models
         public decimal Price { get; set; }
 
         public int Count { get; set; }
-
-
     }
 }

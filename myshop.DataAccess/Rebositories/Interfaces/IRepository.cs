@@ -12,5 +12,13 @@ namespace myshop.DataAccess.Rebositories.Interfaces
         Task DeleteAsync(T entity);
         Task<bool> ExistsAsync(int id);
         Task<int> CountAsync(Expression<Func<T, bool>> predicate = null);
+        Task<T?> GetByIdWithIncludesAsync(int id, params Expression<Func<T, object>>[] includes);
+        Task<IEnumerable<T>> GetArchivedAsync();
+        Task<T?> GetByIdWithDeletedAsync(int id);
+        Task<IEnumerable<T>> GetAllWithIncludesAsync(params Expression<Func<T, object>>[] includes);
+        Task RestoreAsync(T entity);
+
+
+
     }
 }

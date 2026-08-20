@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using myshop.Business.Services.Implementations;
 using myshop.Business.Services.Interfaces;
+using myshop.Business.Setting;
 using myshop.DataAccess;
 using myshop.DataAccess.DbInitializer;
 using myshop.DataAccess.Entities;
@@ -54,6 +55,8 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));// Bind EmailSettings Options
+builder.Services.AddTransient<IEmailSenderService, EmailSenderService>();// Register Email Service
 
 // 1. Register HttpContextAccessor & DistributedMemoryCache for Session
 builder.Services.AddHttpContextAccessor();

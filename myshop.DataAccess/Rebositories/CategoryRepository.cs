@@ -17,7 +17,7 @@ namespace myshop.DataAccess.Rebositories
 
         public async Task<PagedResult<Category>> SearchAsync(string? searchTerm, QueryParameters parameters, CancellationToken cancellationToken = default)
         {
-            var query = context.Categories as IQueryable<Category>;
+            var query = context.Categories.AsNoTracking();
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 var term = searchTerm.ToLower();

@@ -4,6 +4,21 @@
 
 @model PagedResult<Product>
 
+<style>
+    .product-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .product-card:hover {
+            transform: translateY(-8px); /* تحريك البطاقة للأعلى */
+            box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.15) !important; /* زيادة العمق والظل */
+        }
+
+    .hover-title:hover {
+        color: #0d6efd !important; /* تغيير لون العنوان عند الـ hover */
+    }
+</style>
+
 <div class="row row-cols-1 row-cols-md-3 g-4">
     @if (!Model.Items.Any())
     {
@@ -16,8 +31,9 @@
         @foreach (var product in Model.Items)
         {
             <div class="col mb-4">
-                <div class="card h-100 shadow-sm">
-                    <a asp-action="ProductDetails" asp-controller="Home" asp-route-id="@product.Id">
+                <div class="card h-100 shadow-sm position-relative product-card">
+                    <!-- الصورة ورابط التفاصيل -->
+                    <a asp-action="ProductDetails" asp-controller="Home" asp-route-id="@product.Id" class="text-decoration-none">
                         <img class="card-img-top"
                              src="@(string.IsNullOrEmpty(product.Img) ? Url.Content("~/images/placeholder.png") : Url.Content("~/" + product.Img))"
                              alt="@product.Name"
@@ -26,22 +42,58 @@
 
                     <div class="card-body p-4">
                         <div class="text-center">
-                            <h5 class="fw-bolder">@product.Name</h5>
+                            <!-- اسم المنتج قابل للنقر وينقل للتفاصيل -->
+                            <a asp-action="ProductDetails" asp-controller="Home" asp-route-id="@product.Id" class="text-decoration-none text-dark">
+                                <h5 class="fw-bolder mb-1 hover-title">@product.Name</h5>
+                            </a>
+
                             <span class="badge bg-secondary mb-2">@product.Category?.Name</span>
+
+                            <!-- Rating Summary Section -->
+                            @{
+                                var reviews = product.Reviews;
+                                double avgRating = (reviews != null && reviews.Any()) ? reviews.Average(r => r.Rating) : 0;
+                                int reviewCount = reviews?.Count ?? 0;
+                            }
+                            <!-- النجوم ورابط يوجه للتقييمات في صفحة التفاصيل -->
+                            <a asp-action="ProductDetails" asp-controller="Home" asp-route-id="@product.Id" class="text-decoration-none">
+                                <div class="d-flex justify-content-center align-items-center mb-2 gap-1">
+                                    <div class="text-warning small">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= Math.Floor(avgRating))
+                                            {
+                                                <i class="fa-solid fa-star"></i>
+                                            }
+                                            else if (i - avgRating <= 0.5 && i > avgRating)
+                                            {
+                                                <i class="fa-solid fa-star-half-stroke"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="fa-regular fa-star text-muted"></i>
+                                            }
+                                        }
+                                    </div>
+                                    <span class="fw-bold small ms-1 text-dark">@avgRating.ToString("0.0")</span>
+                                    <span class="text-muted small">(@reviewCount)</span>
+                                </div>
+                            </a>
+
                             <div class="text-primary fw-bold fs-5">
                                 @product.Price.ToString("c", new CultureInfo("en-US"))
                             </div>
                         </div>
                     </div>
 
-                    <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                    <div class="card-footer p-4 pt-0 border-top-0 bg-transparent position-relative style-z-index">
                         <div class="text-center">
                             <form asp-controller="Cart" asp-action="AddToCart" method="post">
                                 <input type="hidden" name="productId" value="@product.Id" />
                                 <input type="hidden" name="quantity" value="1" />
                                 <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
 
-                                <button type="submit" class="btn btn-outline-dark mt-auto">
+                                <button type="submit" class="btn btn-outline-dark mt-auto w-100">
                                     <i class="fa-solid fa-cart-plus me-1"></i> Add to cart
                                 </button>
                             </form>
